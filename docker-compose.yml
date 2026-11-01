@@ -1,0 +1,12 @@
+# Sviluppo locale / self-hosting senza Umbrel.
+# Su Umbrel usa il compose dentro frabot-frabot/ e l'app_proxy.
+services:
+  frabot:
+    build: .
+    image: frabot:local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./data:/data

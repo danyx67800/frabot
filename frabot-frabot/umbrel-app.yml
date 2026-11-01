@@ -1,0 +1,56 @@
+manifestVersion: 1
+# Pacchetto standalone (store id `frabot`). Lo store Gigio & Dany usa invece
+# `g-d-app-store-gd-frabot` e l'immagine già configurata su GHCR.
+id: frabot-frabot
+category: Social
+name: FraBot
+version: "1.0.0"
+tagline: Bot Discord self-hosted con pannello web in italiano
+description: |-
+  FraBot è un bot Discord self-hosted che si configura interamente dal browser:
+  niente file da modificare, niente variabili d'ambiente da cercare.
+
+
+  Include un wizard iniziale in 7 passaggi che verifica il token Discord, genera
+  il link di invito, controlla che il bot sia nel server e fa inviare un messaggio
+  di prova.
+
+
+  Moduli disponibili:
+
+  - Ticket: pannello con pulsanti, categorie, canali privati, presa in carico,
+    chiusura automatica, transcript HTML inviati nel canale log e in DM.
+
+  - Mini giochi: Tris, Indovina il numero, Quiz, Pietra-carta-forbice, moneta,
+    dadi e slot, con economia virtuale opzionale, classifiche e editor del quiz.
+
+  - Annunci Twitch: polling delle dirette ogni 60 secondi, deduplica degli stream,
+    menzioni e template personalizzabili per ogni streamer.
+
+
+  Tutto gira in un solo container, con SQLite in /data e pannello protetto dal
+  login di Umbrel. Non usa l'intent privilegiato Message Content.
+developer: FraBot
+website: https://github.com/OWNER/frabot
+dependencies: []
+repo: https://github.com/OWNER/frabot
+support: https://github.com/OWNER/frabot/issues
+port: 8081
+gallery:
+  - https://raw.githubusercontent.com/OWNER/frabot/main/frabot-frabot/gallery/1.png
+  - https://raw.githubusercontent.com/OWNER/frabot/main/frabot-frabot/gallery/2.png
+  - https://raw.githubusercontent.com/OWNER/frabot/main/frabot-frabot/gallery/3.png
+icon: https://raw.githubusercontent.com/OWNER/frabot/main/frabot-frabot/icon.svg
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+releaseNotes: |-
+  Prima versione pubblica.
+
+
+  Include configurazione guidata, modulo ticket con transcript, sette mini giochi
+  con economia virtuale, annunci live Twitch e pannello di gestione completo in
+  italiano. I segreti restano nel volume /data e non vengono mai restituiti dalle
+  API.
+submitter: FraBot
+submission: https://github.com/OWNER/frabot

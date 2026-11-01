@@ -1,0 +1,20 @@
+# local development
+.venv/
+data/
+data-dev/
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# local secrets / exports
+.env
+*.local
+config-export.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
