@@ -35,7 +35,7 @@ website: https://github.com/OWNER/frabot
 dependencies: []
 repo: https://github.com/OWNER/frabot
 support: https://github.com/OWNER/frabot/issues
-port: 8081
+port: 8417
 gallery:
   - https://raw.githubusercontent.com/OWNER/frabot/main/frabot-frabot/gallery/1.png
   - https://raw.githubusercontent.com/OWNER/frabot/main/frabot-frabot/gallery/2.png

@@ -44,9 +44,9 @@ FraBot è nello store community **Gigio & Dany**:
    `app_proxy`.
 5. Segui il wizard. Alla fine il bot invierà un messaggio di prova nel canale scelto.
 
-La porta esterna è **8081** (la 8080 è già usata da GD AMP nello stesso store); il container
-ascolta internamente sulla 8080. L'app non espone porte direttamente sull'host: l'unica porta
-del pannello è gestita da `app_proxy` e protetta dalla sessione Umbrel. Per pubblicare uno
+La porta esterna è **8417**, poco comune e libera nello store (la 8080 è già usata da GD AMP);
+il container ascolta internamente sulla 8080. L'app non espone porte direttamente sull'host:
+l'unica porta del pannello è gestita da `app_proxy` e protetta dalla sessione Umbrel. Per pubblicare uno
 store tuo, vedi il pacchetto standalone più sotto.
 
 ### Primo avvio
@@ -74,7 +74,7 @@ solo manifest e compose; il codice e l'immagine vivono in questo repository.
 
 - Sorgente e workflow: `https://github.com/danyx67800/frabot`
 - Immagine: `ghcr.io/danyx67800/frabot`
-- App nello store: `g-d-app-store-gd-frabot` (porta esterna **8081**, interna **8080**)
+- App nello store: `g-d-app-store-gd-frabot` (porta esterna **8417**, interna **8080**)
 
 Per pubblicare una nuova versione:
 
@@ -241,9 +241,10 @@ lascia ticket e transcript nel volume.
   annunci.
 - **Un solo container.** Bot, API, scheduler della chiusura ticket e polling Twitch vivono
   nello stesso processo. Non servono Redis, Celery o un database esterno.
-- **Porta 8081 esterna, 8080 interna.** Nello store Gigio & Dany il manifest dichiara 8081
-  perché la 8080 è già di GD AMP; `APP_PORT` di `app_proxy` resta 8080, dove ascolta uvicorn.
-  Anche il pacchetto standalone usa 8081. Il compose locale mappa 8080 per comodità.
+- **Porta 8417 esterna, 8080 interna.** Nello store Gigio & Dany il manifest dichiara 8417,
+  una porta poco comune scelta per non collidere con le altre app dello store né con i servizi
+  HTTP più diffusi; `APP_PORT` di `app_proxy` resta 8080, dove ascolta uvicorn. Anche il
+  pacchetto standalone usa 8417. Il compose locale mappa 8080 per comodità.
 - **Due app id.** Nello store Gigio & Dany l'app è `g-d-app-store-gd-frabot` (lo store id è
   `g-d-app-store`); il pacchetto standalone usa invece `frabot-frabot`, perché il suo store id
   è `frabot`. In entrambi i casi la cartella deve chiamarsi come l'app id, perché è anche il
@@ -291,9 +292,10 @@ Il manifest e il compose usati dallo store Gigio & Dany vivono nell'altro reposi
   export della configurazione e scrittura del database in `/data`.
 - Frontend: `node --check` su tutti i file JS, i18n JSON valido, pannello e asset serviti.
 - Manifest e compose dello store validati: id, campi richiesti, `APP_HOST` e assenza di
-  conflitti di porta (FraBot su 8081).
+  conflitti di porta (FraBot su 8417).
 - Pannello e wizard ispezionati nel browser; layout responsive, tema scuro, i18n italiano.
-- Build multi-arch: il workflow è pronto; l'esecuzione su GitHub Actions richiede il push.
+- Build multi-arch eseguita su GitHub Actions: l'immagine
+  `ghcr.io/danyx67800/frabot:1.0.0` è pubblica per `linux/amd64` e `linux/arm64`.
 
 I test con Discord e Twitch reali non sono stati eseguiti in questo ambiente perché non
 esistono credenziali e un server di prova: il wizard li richiede espressamente e li valida
