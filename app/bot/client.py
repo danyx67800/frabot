@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from app.utils import utcnow
@@ -58,26 +59,95 @@ class FraBot(commands.Bot):
                 "ctx_guild_id": self.runtime.config.get()["discord"]["guild_id"],
             },
         )
-        await self.sync_commands()
+        await self.runtime.bot_manager.sync_commands()
 
-    async def sync_commands(self) -> bool:
-        guild_id = self.runtime.config.get()["discord"]["guild_id"]
-        if not guild_id or not self.is_ready():
-            return False
-        guild = discord.Object(id=int(guild_id))
+    async def sync_commands(self, guild: discord.abc.Snowflake | None = None) -> dict:
+        """Publish the application commands and return a result for the panel.
+
+        Discord only shows slash commands after an explicit sync. When the
+        configured guild is stale (bot re-invited, config imported, demo data)
+        we fall back to every guild the bot is actually in, instead of syncing
+        only to an ID that no longer exists. If the bot is not in any guild we
+        register global commands, which are also available after a later join.
+        """
+        if not self.is_ready():
+            return {"ok": False, "count": 0, "error": "Bot Discord non connesso."}
+
+        configured_id = self.runtime.config.get()["discord"]["guild_id"]
+        targets: list[discord.abc.Snowflake] = []
+        if guild is not None:
+            targets = [guild]
+        elif configured_id:
+            selected = self.get_guild(int(configured_id))
+            if selected is not None:
+                targets = [selected]
+            elif self.guilds:
+                targets = list(self.guilds)
+                log.warning(
+                    "La guilda configurata non è disponibile: sincronizzo i comandi nei server in cui sono presente",
+                    extra={"ctx_guild_id": configured_id},
+                )
+        elif self.guilds:
+            targets = list(self.guilds)
+
         try:
-            synced = await self.tree.sync(guild=guild)
-            self._synced_guilds.add(int(guild_id))
-            log.info("Comandi sincronizzati", extra={"ctx_count": len(synced), "ctx_guild_id": guild_id})
-            return True
+            if targets:
+                total = 0
+                synced_ids: list[str] = []
+                for target in targets:
+                    synced = await self.tree.sync(guild=target)
+                    total += len(synced)
+                    target_id = int(target.id)
+                    self._synced_guilds.add(target_id)
+                    synced_ids.append(str(target_id))
+                log.info(
+                    "Comandi sincronizzati",
+                    extra={"ctx_count": total, "ctx_guild_ids": ",".join(synced_ids)},
+                )
+                return {
+                    "ok": True,
+                    "count": total,
+                    "scope": "guild",
+                    "guild_ids": synced_ids,
+                }
+
+            synced = await self.tree.sync()
+            log.info("Comandi globali sincronizzati", extra={"ctx_count": len(synced)})
+            return {"ok": True, "count": len(synced), "scope": "global", "guild_ids": []}
         except discord.Forbidden:
             log.warning(
                 "Impossibile sincronizzare i comandi: manca lo scope applications.commands",
-                extra={"ctx_guild_id": guild_id},
+                extra={"ctx_guild_id": configured_id},
             )
-        except Exception as exc:
+            return {
+                "ok": False,
+                "count": 0,
+                "error": (
+                    "Il bot non ha lo scope applications.commands. "
+                    "Reinvitalo con il link del pannello e riprova."
+                ),
+            }
+        except app_commands.CommandSyncFailure as exc:
+            log.error("Discord ha rifiutato i comandi: %s", exc)
+            return {
+                "ok": False,
+                "count": 0,
+                "error": "Discord ha rifiutato i comandi: controlla i log del pannello.",
+            }
+        except discord.HTTPException as exc:
             log.error("Sincronizzazione comandi fallita: %s", exc)
-        return False
+            return {
+                "ok": False,
+                "count": 0,
+                "error": f"Discord ha risposto con errore {exc.status}.",
+            }
+        except Exception as exc:
+            log.exception("Sincronizzazione comandi fallita")
+            return {
+                "ok": False,
+                "count": 0,
+                "error": f"Sincronizzazione non riuscita: {exc}",
+            }
 
     async def on_app_command_error(
         self, interaction: discord.Interaction, error: Exception
@@ -105,3 +175,7 @@ class FraBot(commands.Bot):
             "Bot aggiunto a un server",
             extra={"ctx_guild_id": str(guild.id), "ctx_guild": guild.name},
         )
+        # The wizard may still be open while the bot is invited. Publishing
+        # the commands here makes them appear even if the admin never presses
+        # the “check” button or the app restarts before syncing.
+        await self.runtime.bot_manager.sync_commands(guild=guild)

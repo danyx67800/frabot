@@ -80,6 +80,19 @@ def _save_wizard(runtime, **updates) -> dict:
     return runtime.config.public_wizard()
 
 
+async def _sync_commands(runtime) -> dict:
+    """Sync the slash commands and turn a Discord failure into a clear error.
+
+    The wizard used to ignore the result: a bot invited without the
+    `applications.commands` scope looked configured but had no commands.
+    """
+    result = await runtime.bot_manager.sync_commands()
+    if not result.get("ok"):
+        detail = result.get("error") or "Riprova tra qualche secondo."
+        raise bad_request(f"Impossibile pubblicare i comandi: {detail}")
+    return result
+
+
 async def _test_twitch(client_id: str, client_secret: str) -> dict:
     candidate = {"twitch": {"client_id": client_id, "client_secret": client_secret}}
     client = TwitchClient(lambda: candidate)
@@ -186,7 +199,7 @@ async def save_step(
             cfg["discord"]["guild_id"] = str(guild.id)
             cfg["discord"]["guild_name"] = guild.name
             runtime.config.save(cfg)
-            await runtime.bot_manager.sync_commands()
+            await _sync_commands(runtime)
             _save_wizard(runtime, step=5)
             return {**_payload(runtime), "auto_selected": True}
         _save_wizard(runtime, step=4)
@@ -203,7 +216,7 @@ async def save_step(
         cfg["discord"]["guild_id"] = str(guild.id)
         cfg["discord"]["guild_name"] = guild.name
         runtime.config.save(cfg)
-        await runtime.bot_manager.sync_commands()
+        await _sync_commands(runtime)
         _save_wizard(runtime, step=5)
         return _payload(runtime)
 
@@ -331,8 +344,8 @@ async def complete(request: Request) -> dict:
             raise bad_request("Esegui il test di autenticazione Twitch.")
     if not wizard["test_sent"]:
         raise bad_request("Invia il messaggio di prova nel canale scelto.")
+    await _sync_commands(runtime)
     _save_wizard(runtime, completed=True, step=7)
-    await runtime.bot_manager.sync_commands()
     log.info("Configurazione guidata completata")
     return _payload(runtime)
 
@@ -348,7 +361,5 @@ async def restart(request: Request) -> dict:
 @router.post("/sync-commands")
 async def sync_commands(request: Request) -> dict:
     runtime = get_rt(request)
-    ok = await runtime.bot_manager.sync_commands()
-    if not ok:
-        raise bad_request("Sincronizzazione non riuscita: controlla che il bot sia online e invitato con lo scope applications.commands.")
-    return {"ok": True}
+    result = await _sync_commands(runtime)
+    return result

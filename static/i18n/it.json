@@ -506,7 +506,7 @@
     "resetDone": "Configurazione azzerata.",
     "resetWrong": "Scrivi RESET per confermare.",
     "syncCommands": "Sincronizza comandi",
-    "syncDone": "Comandi sincronizzati.",
+    "syncDone": "Comandi sincronizzati: {count}.",
     "syncHint": "Utile se i comandi slash non compaiono su Discord.",
     "securityHint": "Il pannello è protetto dal login di Umbrel. I segreti non vengono mai mostrati.",
     "needAppId": "Inserisci l'Application ID.",

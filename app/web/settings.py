@@ -31,6 +31,7 @@ def _settings_payload(runtime) -> dict:
         "config": runtime.config.public(),
         "invite_url": invite_url(runtime.config.get()),
         "permissions": REQUIRED_PERMISSIONS.value,
+        "commands": runtime.bot_manager.last_sync,
     }
 
 
@@ -58,7 +59,10 @@ async def update_modules(request: Request, payload: dict[str, Any] = Body(...)) 
     if modules["twitch"] and not (cfg["twitch"]["client_id"] and cfg["twitch"]["client_secret"]):
         raise bad_request("Configura le credenziali Twitch prima di attivare il modulo.")
     runtime.config.save(cfg)
-    return _settings_payload(runtime)
+    # Enabling the games module is a natural moment to retry a failed sync,
+    # especially on installations configured before the commands existed.
+    commands = await runtime.bot_manager.sync_commands()
+    return {**_settings_payload(runtime), "commands": commands}
 
 
 @router.put("/tickets")

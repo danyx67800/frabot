@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import discord
 
 from app.bot.client import FraBot
-from app.utils import utcnow
+from app.utils import utcnow, utcnow_iso
 
 if TYPE_CHECKING:
     from app.runtime import Runtime
@@ -32,6 +32,7 @@ class BotManager:
         self.last_error: str | None = None
         self.started_at = None
         self.connected_at = None
+        self.last_sync: dict | None = None
 
     @property
     def bot(self) -> FraBot | None:
@@ -59,6 +60,7 @@ class BotManager:
                 return
             bot = FraBot(self.runtime)
             self._bot = bot
+            self.last_sync = None
             self.started_at = self.started_at or utcnow()
             failure = None
             try:
@@ -112,13 +114,17 @@ class BotManager:
         async with self._lock:
             await self.stop()
             self.last_error = None
+            self.last_sync = None
             self.started_at = utcnow()
             self.start()
 
-    async def sync_commands(self) -> bool:
+    async def sync_commands(self, guild: discord.abc.Snowflake | None = None) -> dict:
         if self._bot and self._bot.is_ready():
-            return await self._bot.sync_commands()
-        return False
+            result = await self._bot.sync_commands(guild=guild)
+        else:
+            result = {"ok": False, "count": 0, "error": "Bot Discord non connesso."}
+        self.last_sync = {**result, "at": utcnow_iso()}
+        return result
 
     async def wait_ready(self, timeout: float = 10.0) -> bool:
         deadline = asyncio.get_running_loop().time() + timeout
@@ -165,6 +171,7 @@ class BotManager:
             "guild_id": selected or None,
             "guild_name": selected_name,
             "last_error": self.last_error,
+            "commands": self.last_sync,
         }
 
     def mark_connected(self) -> None:

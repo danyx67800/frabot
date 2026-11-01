@@ -4,7 +4,7 @@ manifestVersion: 1
 id: frabot-frabot
 category: Social
 name: FraBot
-version: "1.0.0"
+version: "1.0.1"
 tagline: Bot Discord self-hosted con pannello web in italiano
 description: |-
   FraBot è un bot Discord self-hosted che si configura interamente dal browser:
@@ -45,12 +45,16 @@ path: ""
 defaultUsername: ""
 defaultPassword: ""
 releaseNotes: |-
-  Prima versione pubblica.
+  Correzioni per il pannello ticket e per i comandi slash.
 
 
-  Include configurazione guidata, modulo ticket con transcript, sette mini giochi
-  con economia virtuale, annunci live Twitch e pannello di gestione completo in
-  italiano. I segreti restano nel volume /data e non vengono mai restituiti dalle
-  API.
+  - Il pulsante "Pubblica pannello" ora invia davvero il pannello e mostra gli
+    errori di Discord, invece di interrompersi prima della richiesta.
+
+  - I comandi dei mini giochi vengono sincronizzati all'avvio, quando il bot
+    entra nel server e quando si salvano i moduli.
+
+  - Il pannello mostra quanti comandi sono stati pubblicati e segnala lo scope
+    applications.commands mancante.
 submitter: FraBot
 submission: https://github.com/OWNER/frabot

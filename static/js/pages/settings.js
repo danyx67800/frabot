@@ -110,8 +110,8 @@ export async function render(ctx) {
     variant: "ghost",
     onClick: async () => {
       try {
-        await api("/api/wizard/sync-commands", { method: "POST" });
-        toast(t("settings.syncDone"), "success");
+        const result = await api("/api/wizard/sync-commands", { method: "POST" });
+        toast(t("settings.syncDone", { count: result.count ?? 0 }), "success");
       } catch (error) { toast(errorMessage(error), "error"); }
     },
   });

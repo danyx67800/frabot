@@ -109,13 +109,17 @@ export async function render(ctx) {
   const publishButton = button(t("tickets.publish"), {
     variant: "secondary",
     onClick: async (event) => {
+      // `currentTarget` is only valid during the synchronous part of the
+      // event. Capture it before awaiting, otherwise it becomes null and the
+      // request below never starts.
+      const trigger = event.currentTarget;
       if (!categories.length) {
         toast(t("tickets.publishNoCategories"), "error");
         return;
       }
-      if (!(await saveConfig(true))) return;
-      event.currentTarget.disabled = true;
+      trigger.disabled = true;
       try {
+        if (!(await saveConfig(true))) return;
         await api("/api/tickets/publish", { method: "POST" });
         panel = await api("/api/tickets/panel");
         needsRepublish = false;
@@ -124,7 +128,7 @@ export async function render(ctx) {
       } catch (error) {
         toast(errorMessage(error), "error");
       } finally {
-        event.currentTarget.disabled = false;
+        trigger.disabled = false;
       }
     },
   });
