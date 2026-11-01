@@ -4,7 +4,7 @@ manifestVersion: 1
 id: frabot-frabot
 category: Social
 name: FraBot
-version: "1.0.1"
+version: "1.0.2"
 tagline: Bot Discord self-hosted con pannello web in italiano
 description: |-
   FraBot è un bot Discord self-hosted che si configura interamente dal browser:
@@ -45,16 +45,13 @@ path: ""
 defaultUsername: ""
 defaultPassword: ""
 releaseNotes: |-
-  Correzioni per il pannello ticket e per i comandi slash.
+  Corregge la sincronizzazione dei comandi nelle gilde.
 
 
-  - Il pulsante "Pubblica pannello" ora invia davvero il pannello e mostra gli
-    errori di Discord, invece di interrompersi prima della richiesta.
-
-  - I comandi dei mini giochi vengono sincronizzati all'avvio, quando il bot
-    entra nel server e quando si salvano i moduli.
-
-  - Il pannello mostra quanti comandi sono stati pubblicati e segnala lo scope
-    applications.commands mancante.
+  discord.py sincronizza in una gilda solo i comandi registrati per quella
+  gilda: i comandi globali venivano ignorati e Discord restituiva 0. Ora i
+  comandi vengono copiati nella gilda prima della sincronizzazione; se non
+  viene registrato nulla, il pannello mostra un errore invece di un falso
+  successo.
 submitter: FraBot
 submission: https://github.com/OWNER/frabot

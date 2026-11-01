@@ -90,11 +90,26 @@ class FraBot(commands.Bot):
         elif self.guilds:
             targets = list(self.guilds)
 
+        available = len(self.tree.get_commands())
+        if not available:
+            return {
+                "ok": False,
+                "count": 0,
+                "available": 0,
+                "error": "Nessun comando caricato nel bot. Riavvia FraBot e riprova.",
+            }
+
         try:
             if targets:
                 total = 0
                 synced_ids: list[str] = []
                 for target in targets:
+                    # `tree.sync(guild=...)` only sends commands registered for
+                    # that specific guild. The commands in this bot are global,
+                    # so copy them into the guild first: otherwise Discord
+                    # receives an empty list and returns zero commands.
+                    self.tree.clear_commands(guild=target)
+                    self.tree.copy_global_to(guild=target)
                     synced = await self.tree.sync(guild=target)
                     total += len(synced)
                     target_id = int(target.id)
@@ -104,16 +119,35 @@ class FraBot(commands.Bot):
                     "Comandi sincronizzati",
                     extra={"ctx_count": total, "ctx_guild_ids": ",".join(synced_ids)},
                 )
+                if not total:
+                    return {
+                        "ok": False,
+                        "count": 0,
+                        "available": available,
+                        "scope": "guild",
+                        "guild_ids": synced_ids,
+                        "error": (
+                            "Discord non ha registrato nessun comando. "
+                            "Riprova tra poco o controlla i log del pannello."
+                        ),
+                    }
                 return {
                     "ok": True,
                     "count": total,
+                    "available": available,
                     "scope": "guild",
                     "guild_ids": synced_ids,
                 }
 
             synced = await self.tree.sync()
             log.info("Comandi globali sincronizzati", extra={"ctx_count": len(synced)})
-            return {"ok": True, "count": len(synced), "scope": "global", "guild_ids": []}
+            return {
+                "ok": True,
+                "count": len(synced),
+                "available": available,
+                "scope": "global",
+                "guild_ids": [],
+            }
         except discord.Forbidden:
             log.warning(
                 "Impossibile sincronizzare i comandi: manca lo scope applications.commands",

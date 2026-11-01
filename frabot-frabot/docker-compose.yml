@@ -21,7 +21,7 @@ services:
       - ${APP_DATA_DIR}/data:/data
 
   web:
-    image: ghcr.io/OWNER/frabot:1.0.1
+    image: ghcr.io/OWNER/frabot:1.0.2
     restart: unless-stopped
     init: true
     stop_grace_period: 30s
