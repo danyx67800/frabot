@@ -78,7 +78,8 @@ solo manifest e compose; il codice e l'immagine vivono in questo repository.
 
 Per pubblicare una nuova versione:
 
-1. Aggiorna la versione in `app/__init__.py` e in `frabot-frabot/umbrel-app.yml`.
+1. Aggiorna la versione in `app/__init__.py` (e, se usi anche il pacchetto standalone, in
+   `frabot-frabot/umbrel-app.yml`).
 2. Commit e push su `main`; crea e pubblica il tag `v1.0.1`.
 3. Attendi il workflow **Publish Docker image** e verifica
    `ghcr.io/danyx67800/frabot:1.0.1`.
