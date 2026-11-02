@@ -2,7 +2,7 @@ import { api } from "./api.js";
 import { clearGuildData } from "./data.js";
 import { loadI18n, t } from "./i18n.js";
 import { setStatus, store } from "./store.js";
-import { button, clear, errorBox, h, icon, spinner, statusDot } from "./ui.js";
+import { brandMark, button, clear, errorBox, h, icon, spinner, statusDot } from "./ui.js";
 import { renderWizard } from "./wizard.js";
 import * as dashboard from "./pages/dashboard.js";
 import * as tickets from "./pages/tickets.js";
@@ -37,7 +37,7 @@ function navLink(item) {
   return h(
     "a",
     { class: "nav-link", href: `#/${item.route}`, "data-route": item.route },
-    icon(item.icon),
+    icon(item.icon, "nav-ico"),
     h("span", { text: t(`nav.${item.route}`) }),
   );
 }
@@ -49,11 +49,11 @@ function buildShell() {
     h(
       "a",
       { class: "brand", href: "#/dashboard" },
-      h("div", { class: "brand-mark", text: "FB" }),
+      brandMark(),
       h(
         "div",
         { class: "brand-copy" },
-        h("strong", { text: t("app.name") }),
+        h("strong", {}, h("span", { text: "fra" }), h("em", { text: "/" }), h("span", { text: "bot" })),
         h("span", { text: t("app.tagline") }),
       ),
     ),
@@ -99,10 +99,11 @@ function buildShell() {
       h("span", { class: "top-server" }, h("span", { class: "top-label", text: t("layout.server") }), serverName),
       h("span", { class: "top-bot" }, botDot, botLabel),
       version,
-      button(t("common.refresh"), {
+      button("", {
         variant: "ghost",
         icon: "refresh",
         title: t("layout.refreshStatus"),
+        ariaLabel: t("layout.refreshStatus"),
         onClick: () => refreshStatus(true),
       }),
     ),
@@ -135,9 +136,12 @@ function updateChrome() {
   const sideVersion = document.getElementById("side-version");
   if (sideVersion) sideVersion.textContent = status ? `${t("layout.version")} ${status.version}` : "";
   const title = document.getElementById("top-title");
-  if (title) title.textContent = t(`nav.${parseRoute()}`);
+  if (title) title.textContent = `fra/bot / ${t(`nav.${parseRoute()}`)}`;
   document.querySelectorAll(".nav-link").forEach((link) => {
-    link.classList.toggle("active", link.dataset.route === parseRoute());
+    const active = link.dataset.route === parseRoute();
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
   });
 }
 
@@ -249,7 +253,7 @@ async function boot() {
     await loadI18n();
   } catch {
     root.replaceChildren(
-      h("div", { class: "boot" }, h("div", { class: "boot-logo", text: "FB" }), h("p", { text: "Errore nel caricamento della lingua." })),
+      h("div", { class: "boot" }, brandMark("boot-logo"), h("p", { text: "Errore nel caricamento della lingua." })),
     );
     return;
   }
@@ -259,7 +263,7 @@ async function boot() {
     setStatus(status);
   } catch (error) {
     root.replaceChildren(
-      h("div", { class: "boot" }, h("div", { class: "boot-logo", text: "FB" }), h("h1", { text: t("app.name") }), h("p", { text: error.message || t("common.errorGeneric") }),
+      h("div", { class: "boot" }, brandMark("boot-logo"), h("h1", { text: t("app.name") }), h("p", { text: error.message || t("common.errorGeneric") }),
         button(t("common.retry"), { variant: "primary", onClick: () => window.location.reload() })),
     );
     return;

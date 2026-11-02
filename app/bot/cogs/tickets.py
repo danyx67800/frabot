@@ -35,7 +35,7 @@ def color_for(runtime: "Runtime") -> discord.Color:
     try:
         return discord.Color(int(raw, 16))
     except ValueError:
-        return discord.Color(0x7C5CFF)
+        return discord.Color(0xD2E85C)
 
 
 def staff_ids(category: dict) -> list[int]:

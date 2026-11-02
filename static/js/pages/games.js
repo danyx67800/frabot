@@ -16,7 +16,7 @@ const GAME_LABELS = {
   moneta: "games.gameMoneta",
   slot: "games.gameSlot",
 };
-const GAME_ICONS = { tris: "❌", indovina: "🔢", quiz: "🧠", rps: "✂️", dado: "🎲", moneta: "🪙", slot: "🎰" };
+const GAME_ICONS = { tris: "TR", indovina: "N°", quiz: "QZ", rps: "RPS", dado: "D6", moneta: "CN", slot: "SL" };
 
 function optionText(question) {
   const options = question.options || [];

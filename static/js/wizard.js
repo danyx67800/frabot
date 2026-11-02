@@ -1,7 +1,7 @@
 import { api, errorMessage } from "./api.js";
 import { t, tList } from "./i18n.js";
 import {
-  button, card, channelOptions, clear, copyText, field, h, input, select, spinner,
+  brandMark, button, card, channelOptions, clear, copyText, field, h, input, select, spinner,
   textarea, toast, toggleRow,
 } from "./ui.js";
 
@@ -23,19 +23,21 @@ function brandPanel() {
     h(
       "div",
       { class: "brand" },
-      h("div", { class: "brand-mark", text: "FB" }),
-      h("div", { class: "brand-copy" }, h("strong", { text: t("app.name") }), h("span", { text: t("app.tagline") })),
+      brandMark(),
+      h("div", { class: "brand-copy" },
+        h("strong", {}, h("span", { text: "fra" }), h("em", { text: "/" }), h("span", { text: "bot" })),
+        h("span", { text: t("app.tagline") })),
     ),
     h("h1", { text: t("wizard.title") }),
     h("p", { class: "wizard-brand-lead", text: t("wizard.step1Lead") }),
     h(
       "ul",
       { class: "feature-list" },
-      h("li", {}, h("span", { text: "✦" }), h("span", { text: t("wizard.step1NoMessageIntent") })),
-      h("li", {}, h("span", { text: "✦" }), h("span", { text: t("wizard.step1Volume") })),
-      h("li", {}, h("span", { text: "✦" }), h("span", { text: t("wizard.step1HowText") })),
+      h("li", {}, h("span", { class: "feature-index", text: "01" }), h("span", { text: t("wizard.step1NoMessageIntent") })),
+      h("li", {}, h("span", { class: "feature-index", text: "02" }), h("span", { text: t("wizard.step1Volume") })),
+      h("li", {}, h("span", { class: "feature-index", text: "03" }), h("span", { text: t("wizard.step1HowText") })),
     ),
-    h("div", { class: "wizard-brand-foot" }, h("span", { text: "FraBot" }), h("span", { text: "self-hosted · Umbrel" })),
+    h("div", { class: "wizard-brand-foot" }, h("span", { text: "fra/bot" }), h("span", { text: "self-hosted / Umbrel" })),
   );
 }
 
@@ -579,7 +581,7 @@ export async function renderWizard(options = {}) {
     render();
   } catch (error) {
     shell.replaceChildren(
-      h("div", { class: "boot" }, h("div", { class: "boot-logo", text: "FB" }), h("p", { text: errorMessage(error) }),
+      h("div", { class: "boot" }, brandMark("boot-logo"), h("p", { text: errorMessage(error) }),
         button(t("common.retry"), { variant: "primary", onClick: () => renderWizard(options) })),
     );
   }

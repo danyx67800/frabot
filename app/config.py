@@ -36,7 +36,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "guild_name": "",
     },
     "modules": {"tickets": False, "games": False, "twitch": False},
-    "ui": {"embed_color": "#7C5CFF"},
+    "ui": {"embed_color": "#D2E85C"},
     "tickets": {
         "panel_channel_id": "",
         "log_channel_id": "",
@@ -107,7 +107,7 @@ def normalize_config(raw: Any) -> dict[str, Any]:
 
     ui = raw.get("ui") if isinstance(raw.get("ui"), dict) else {}
     color = as_str(ui.get("embed_color"), "", 7)
-    cfg["ui"]["embed_color"] = color.upper() if _COLOR_RE.match(color) else "#7C5CFF"
+    cfg["ui"]["embed_color"] = color.upper() if _COLOR_RE.match(color) else "#D2E85C"
 
     tickets = raw.get("tickets") if isinstance(raw.get("tickets"), dict) else {}
     cfg["tickets"]["panel_channel_id"] = snowflake_or_empty(tickets.get("panel_channel_id"))

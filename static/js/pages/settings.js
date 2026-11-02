@@ -74,8 +74,8 @@ export async function render(ctx) {
       button(t("common.copyLink"), { variant: "ghost", onClick: () => copyText(response.invite_url || "") }))));
 
   // -- appearance ------------------------------------------------------
-  const colorInput = h("input", { type: "color", class: "input color-input", value: config.ui.embed_color || "#7C5CFF" });
-  const colorText = input({ value: config.ui.embed_color || "#7C5CFF", maxlength: 7 });
+  const colorInput = h("input", { type: "color", class: "input color-input", value: config.ui.embed_color || "#D2E85C" });
+  const colorText = input({ value: config.ui.embed_color || "#D2E85C", maxlength: 7 });
   colorInput.addEventListener("input", () => { colorText.value = colorInput.value.toUpperCase(); });
   colorText.addEventListener("input", () => {
     if (/^#[0-9a-fA-F]{6}$/.test(colorText.value)) colorInput.value = colorText.value;

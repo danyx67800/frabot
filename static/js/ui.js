@@ -27,25 +27,35 @@ export function clear(node) {
   return node;
 }
 
-export const ICONS = {
-  dashboard: "▦",
-  tickets: "🎫",
-  games: "🎮",
-  twitch: "📡",
-  logs: "≣",
-  settings: "⚙",
-  plus: "＋",
-  trash: "🗑",
-  edit: "✎",
-  refresh: "↻",
-  external: "↗",
-  chevron: "›",
-  check: "✓",
-  close: "✕",
-  menu: "☰",
-  copy: "⧉",
-  search: "⌕",
+const SVG_ICONS = {
+  dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  tickets: '<path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 5v2M13 11v2M13 17v2"/>',
+  games: '<path d="M7 8h10a4 4 0 0 1 3.9 4.9l-.6 2.8A3 3 0 0 1 15.7 17l-1.2-1.4H9.5L8.3 17a3 3 0 0 1-4.6-1.3l-.6-2.8A4 4 0 0 1 7 8Z"/><path d="M8 11v3M6.5 12.5h3M15 11h.01M17 13h.01"/>',
+  twitch: '<path d="M4.5 11a7.5 7.5 0 0 1 15 0"/><path d="M7.5 11a4.5 4.5 0 0 1 9 0"/><circle cx="12" cy="11" r="1"/><path d="M12 18v3M8 21h8"/>',
+  logs: '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.51 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.2.36.5.7.9.9.35.2.75.3 1.1.3H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51.8Z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v5M14 11v5"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>',
+  external: '<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  chevron: '<path d="m9 18 6-6-6-6"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  bot: '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/><circle cx="12" cy="3" r="1"/>',
+  server: '<rect x="4" y="3" width="16" height="7" rx="2"/><rect x="4" y="14" width="16" height="7" rx="2"/><path d="M8 7h.01M8 17h.01"/>',
+  activity: '<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
+  database: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  tag: '<path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/>',
+  alert: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
 };
+
+export const ICONS = SVG_ICONS;
 
 export function button(label, options = {}) {
   const node = h(
@@ -61,14 +71,35 @@ export function button(label, options = {}) {
     options.emoji ? h("span", { class: "btn-emoji", text: options.emoji }) : null,
     label ? h("span", { text: label }) : null,
   );
-  if (options.icon) {
-    node.prepend(h("span", { class: "btn-emoji", "aria-hidden": "true", text: ICONS[options.icon] || options.icon }));
-  }
+  if (options.icon) node.prepend(icon(options.icon, "btn-icon"));
   return node;
 }
 
-export function icon(name) {
-  return h("span", { class: "ico", "aria-hidden": "true", text: ICONS[name] || "•" });
+export function icon(name, className = "ico") {
+  const node = h("span", { class: className, "aria-hidden": "true" });
+  const markup = SVG_ICONS[name];
+  if (!markup) {
+    node.textContent = "•";
+    return node;
+  }
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.8");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.innerHTML = markup;
+  node.append(svg);
+  return node;
+}
+
+export function brandMark(className = "brand-mark") {
+  return h(
+    "span",
+    { class: className, "aria-hidden": "true" },
+    h("img", { src: "/static/icon.svg", alt: "" }),
+  );
 }
 
 export function card(title, ...children) {
@@ -340,7 +371,7 @@ export function roleOptions(roles) {
 
 export function embedPreview(embed, content = "", footerOverride = "") {
   if (!embed) return emptyState(t("common.noData"));
-  const color = embed.color ? `#${Number(embed.color).toString(16).padStart(6, "0")}` : "#8b6dff";
+  const color = embed.color ? `#${Number(embed.color).toString(16).padStart(6, "0")}` : "#D2E85C";
   const thumbnail = embed.thumbnail?.url;
   return h(
     "div",

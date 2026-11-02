@@ -40,7 +40,7 @@ def _color(runtime: "Runtime") -> discord.Color:
     try:
         return discord.Color(int(runtime.config.get()["ui"]["embed_color"].lstrip("#"), 16))
     except ValueError:
-        return discord.Color(0x7C5CFF)
+        return discord.Color(0xD2E85C)
 
 
 def _record(

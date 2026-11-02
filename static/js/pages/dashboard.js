@@ -1,17 +1,37 @@
 import { api, errorMessage } from "../api.js";
 import { t } from "../i18n.js";
 import {
-  badge, button, card, clear, emptyState, fmtDate, fmtNumber, fmtUptime, h,
-  pageHeader, spinner, statusDot,
+  badge, button, clear, emptyState, fmtDate, fmtNumber, fmtUptime, h, statusDot,
 } from "../ui.js";
 
-function statCard(label, valueNode, hint = "", accent = "") {
+function statCard(label, valueNode, hintNode, accent = false, small = false) {
+  return h(
+    "article",
+    { class: `stat-card${accent ? " accent" : ""}` },
+    h("div", { class: "stat-top" }, h("span", { class: "stat-label", text: label })),
+    h("div", { class: small ? "stat-strong" : "stat-value" }, valueNode),
+    hintNode,
+  );
+}
+
+function warningCard(tone, title, text, actionLabel, onClick) {
+  const warn = tone === "warn";
   return h(
     "div",
-    { class: `stat-card ${accent}` },
-    h("div", { class: "stat-label", text: label }),
-    h("div", { class: "stat-value" }, valueNode),
-    hint ? h("div", { class: "stat-hint", text: hint }) : null,
+    { class: `warning-card${warn ? " warn" : ""}` },
+    h("span", { class: "warning-icon", text: warn ? "!" : "i" }),
+    h("div", {}, h("strong", { text: title }), h("p", { text })),
+    button(actionLabel, { variant: "ghost", onClick }),
+  );
+}
+
+function instanceRow(index, label, valueNode) {
+  return h(
+    "div",
+    { class: "instance-row" },
+    h("span", { class: "instance-index", text: index }),
+    h("span", { class: "instance-label", text: label }),
+    valueNode,
   );
 }
 
@@ -21,66 +41,109 @@ function logRows(items) {
     h(
       "tr",
       {},
-      h("td", { class: "mono muted", text: new Date(item.ts).toLocaleTimeString("it-IT") }),
-      h("td", {}, badge(item.level, item.level === "ERROR" ? "error" : item.level === "WARNING" ? "warn" : "neutral")),
+      h("td", { class: "log-time mono", text: new Date(item.ts).toLocaleTimeString("it-IT") }),
+      h("td", {}, badge(item.level, item.level === "ERROR" || item.level === "CRITICAL" ? "error" : item.level === "WARNING" ? "warn" : "neutral")),
       h("td", { class: "log-message", text: item.message }),
-    ),
-  );
+    ));
 }
 
 export async function render(ctx) {
-  const status = ctx.state.status;
-  const page = h("div", {});
+  const status = ctx.state.status || {};
+  const page = h("div", { class: "dashboard-page" });
   page.append(
-    pageHeader(t("dashboard.title"), t("dashboard.subtitle"), [
-      button(t("common.refresh"), { variant: "ghost", onClick: () => ctx.reload() }),
-    ]),
+    h(
+      "div",
+      { class: "page-head" },
+      h(
+        "div",
+        { class: "page-head-copy" },
+        h("div", { class: "page-eyebrow" }, h("span", { class: "eyebrow-dot" }), h("span", { text: t("dashboard.overview") })),
+        h("h1", { text: t("dashboard.title") }),
+        h("p", { text: t("dashboard.subtitle") }),
+      ),
+      h("div", { class: "page-actions" },
+        button(t("common.refresh"), { variant: "ghost", onClick: () => ctx.reload() })),
+    ),
   );
 
   const warnings = h("div", { class: "warnings" });
   const panelWarnings = h("div", { class: "warnings" });
-  const botValue = h("div", {});
+  const botValue = h("div", { class: "stat-inline" });
   const botHint = h("div", { class: "stat-hint" });
-  const serverValue = h("div", {});
+  const serverValue = h("span", { text: "—" });
   const serverHint = h("div", { class: "stat-hint" });
-  const moduleValue = h("div", {});
+  const moduleValue = h("span", { text: "—" });
   const moduleHint = h("div", { class: "stat-hint" });
-  const twitchValue = h("div", {});
+  const twitchValue = h("span", { text: "—" });
   const twitchHint = h("div", { class: "stat-hint" });
 
   page.append(
-    h("div", { class: "stats-grid" },
-      statCard(t("dashboard.botStatus"), botValue, "", "accent"),
-      statCard(t("layout.server"), serverValue, "", ""),
-      statCard(t("dashboard.activeModules"), moduleValue, "", ""),
-      statCard(t("dashboard.twitchLive"), twitchValue, "", "")),
+    h("div", { class: "stats-grid dashboard-kpis" },
+      statCard(t("dashboard.botStatus"), botValue, botHint, true),
+      statCard(t("layout.server"), serverValue, serverHint, false, true),
+      statCard(t("dashboard.activeModules"), moduleValue, moduleHint, false, true),
+      statCard(t("dashboard.twitchLive"), twitchValue, twitchHint, false, true)),
     warnings,
     panelWarnings,
   );
 
+  const moduleCount = h("span", { class: "badge badge-neutral", text: "—" });
   const moduleList = h("div", { class: "module-list" });
-  const moduleCard = card(t("dashboard.modules"), moduleList,
-    h("p", { class: "muted small", text: t("dashboard.modulesHint") }));
+  const moduleCard = h(
+    "section",
+    { class: "card module-card-panel" },
+    h("div", { class: "card-head" },
+      h("div", { class: "card-heading" },
+        h("h2", { text: t("dashboard.modules") }),
+        h("p", { class: "card-subtitle", text: t("dashboard.modulesHint") })),
+      moduleCount),
+    h("div", { class: "card-body" }, moduleList),
+  );
+
+  const instanceUptime = h("span", { class: "instance-value", text: "—" });
+  const instanceDb = h("span", { class: "instance-value" });
+  const instanceVersion = h("span", { class: "instance-value", text: "—" });
+  const instanceStarted = h("span", { class: "instance-value", text: fmtDate(status.started_at) });
+  const instanceCard = h(
+    "section",
+    { class: "card instance-card" },
+    h("div", { class: "card-head" },
+      h("div", { class: "card-heading" },
+        h("h2", { text: t("dashboard.instance") }),
+        h("p", { class: "card-subtitle", text: t("dashboard.instanceHint") }))),
+    h("div", { class: "card-body" },
+      instanceRow("01", t("dashboard.uptime"), instanceUptime),
+      instanceRow("02", t("dashboard.database"), instanceDb),
+      instanceRow("03", t("dashboard.version"), instanceVersion),
+      instanceRow("04", t("dashboard.started"), instanceStarted)),
+  );
 
   const logsBody = h("tbody", {});
   const logsCard = h(
     "section",
-    { class: "card" },
+    { class: "card logs-card" },
     h("div", { class: "card-head" },
-      h("h2", { text: t("dashboard.recentLogs") }),
+      h("div", { class: "card-heading" },
+        h("h2", { text: t("dashboard.recentLogs") }),
+        h("p", { class: "card-subtitle", text: t("dashboard.recentLogsHint") })),
       button(t("dashboard.viewAllLogs"), { variant: "ghost", onClick: () => ctx.navigate("logs") })),
-    h("div", { class: "card-body table-wrap" },
-      h("table", { class: "table" },
-        h("thead", {}, h("tr", {}, h("th", { text: t("logs.time") }), h("th", { text: t("logs.level") }), h("th", { text: t("logs.message") }))),
-        logsBody)),
+    h("div", { class: "card-body logs-card-body" },
+      h("div", { class: "table-wrap" },
+        h("table", { class: "table logs-table" },
+          h("thead", {}, h("tr", {},
+            h("th", { text: t("logs.time") }),
+            h("th", { text: t("logs.level") }),
+            h("th", { text: t("logs.message") }))),
+          logsBody))),
   );
 
-  page.append(h("div", { class: "dash-grid" }, moduleCard, logsCard));
-  page.append(h("div", { class: "dash-foot", text: `${t("dashboard.startedAt")} ${fmtDate(status?.started_at)}` }));
-  const root = h("div", {});
-  root.append(page);
+  page.append(
+    logsCard,
+    h("div", { class: "dash-bottom" }, moduleCard, instanceCard),
+  );
+
   const host = document.getElementById("page");
-  host.replaceChildren(root);
+  host.replaceChildren(page);
 
   async function loadPanelWarning() {
     if (!status?.modules?.tickets) return;
@@ -88,9 +151,13 @@ export async function render(ctx) {
       const panel = await api("/api/tickets/panel");
       if (!panel.published) {
         panelWarnings.append(
-          h("div", { class: "warning-card" },
-            h("div", {}, h("strong", { text: t("dashboard.panelMissing") }), h("p", { text: t("dashboard.panelMissingHint") })),
-            button(t("dashboard.manage"), { variant: "secondary", onClick: () => ctx.navigate("tickets") })),
+          warningCard(
+            "info",
+            t("dashboard.panelMissing"),
+            t("dashboard.panelMissingHint"),
+            t("dashboard.manage"),
+            () => ctx.navigate("tickets"),
+          ),
         );
       }
     } catch { /* non-blocking */ }
@@ -98,18 +165,26 @@ export async function render(ctx) {
 
   function updateWarnings(current) {
     clear(warnings);
-    if (!current.bot.connected) {
+    if (!current.bot?.connected) {
       warnings.append(
-        h("div", { class: "warning-card warn" },
-          h("div", {}, h("strong", { text: t("common.noBot") }), h("p", { text: current.bot.last_error || t("common.noBotHint") })),
-          button(t("common.retry"), { variant: "ghost", onClick: () => ctx.refreshStatus(true) })),
+        warningCard(
+          "warn",
+          t("common.noBot"),
+          current.bot?.last_error || t("common.noBotHint"),
+          t("common.retry"),
+          () => ctx.refreshStatus(true),
+        ),
       );
     }
-    if (current.twitch.errors) {
+    if (current.twitch?.errors) {
       warnings.append(
-        h("div", { class: "warning-card warn" },
-          h("div", {}, h("strong", { text: t("dashboard.twitchErrors") }), h("p", { text: t("dashboard.twitchErrorsHint") })),
-          button(t("dashboard.manage"), { variant: "ghost", onClick: () => ctx.navigate("twitch") })),
+        warningCard(
+          "warn",
+          t("dashboard.twitchErrors"),
+          t("dashboard.twitchErrorsHint"),
+          t("dashboard.manage"),
+          () => ctx.navigate("twitch"),
+        ),
       );
     }
   }
@@ -117,44 +192,63 @@ export async function render(ctx) {
   function renderModules(current) {
     clear(moduleList);
     const entries = [
-      ["tickets", t("dashboard.moduleTickets"), t("dashboard.moduleTicketsHint")],
-      ["games", t("dashboard.moduleGames"), t("dashboard.moduleGamesHint")],
-      ["twitch", t("dashboard.moduleTwitch"), t("dashboard.moduleTwitchHint")],
+      ["tickets", t("dashboard.moduleTickets"), t("dashboard.moduleTicketsHint"), "TK"],
+      ["games", t("dashboard.moduleGames"), t("dashboard.moduleGamesHint"), "MG"],
+      ["twitch", t("dashboard.moduleTwitch"), t("dashboard.moduleTwitchHint"), "TW"],
     ];
-    for (const [key, label, hint] of entries) {
-      const on = current.modules[key];
+    let active = 0;
+    for (const [key, label, hint, code] of entries) {
+      const on = Boolean(current.modules?.[key]);
+      if (on) active += 1;
       moduleList.append(
         h("div", { class: "module-row" },
-          h("span", { class: `module-dot ${on ? "on" : ""}` }),
+          h("span", { class: `module-tile${on ? " on" : ""}`, text: code }),
           h("div", { class: "module-row-copy" }, h("strong", { text: label }), h("small", { text: hint })),
           badge(on ? t("common.enabled") : t("common.disabled"), on ? "ok" : "neutral"),
-          button(t("dashboard.manage"), { variant: "ghost", onClick: () => ctx.navigate(key === "games" ? "games" : key) })),
+          button("", {
+            variant: "ghost",
+            icon: "chevron",
+            title: t("dashboard.manage"),
+            ariaLabel: `${t("dashboard.manage")} ${label}`,
+            onClick: () => ctx.navigate(key === "games" ? "games" : key),
+          })),
       );
     }
+    moduleCount.textContent = `${active} / ${entries.length}`;
+    moduleCount.className = `badge ${active === entries.length ? "badge-ok" : "badge-neutral"}`;
+  }
+
+  function renderInstance(current) {
+    instanceUptime.textContent = fmtUptime(current.uptime_seconds);
+    instanceDb.replaceChildren(badge(current.database ? "OK" : "KO", current.database ? "ok" : "error"));
+    instanceVersion.textContent = current.version ? `v${current.version}` : "—";
+    instanceStarted.textContent = fmtDate(current.started_at);
   }
 
   function updateStats(current) {
-    const connected = current.bot.connected;
+    const connected = Boolean(current.bot?.connected);
     clear(botValue);
-    botValue.append(h("div", { class: "stat-inline" }, statusDot(connected), h("span", { text: connected ? current.bot.user || t("common.online") : t("common.offline") })));
+    botValue.append(
+      statusDot(connected),
+      h("span", { text: connected ? current.bot.user || t("common.online") : t("common.offline") }),
+    );
     botHint.textContent = connected
       ? `${t("dashboard.ping")} ${current.bot.latency_ms ?? "—"} ms · ${t("dashboard.uptime")} ${fmtUptime(current.bot.uptime_seconds)}`
-      : current.bot.last_error || t("common.noBotHint");
+      : current.bot?.last_error || t("common.noBotHint");
 
-    clear(serverValue);
-    serverValue.append(h("div", { class: "stat-strong", text: current.guild?.name || t("layout.noServer") }));
-    const guild = current.bot.guilds?.find((item) => item.id === current.guild?.id);
+    serverValue.textContent = current.guild?.name || t("layout.noServer");
+    const guild = current.bot?.guilds?.find((item) => item.id === current.guild?.id);
     serverHint.textContent = guild?.member_count ? `${fmtNumber(guild.member_count)} membri` : t("dashboard.guild");
 
     const active = Object.values(current.modules || {}).filter(Boolean).length;
-    clear(moduleValue);
-    moduleValue.append(h("div", { class: "stat-strong", text: `${active} / 3` }));
+    moduleValue.textContent = `${active} / 3`;
     moduleHint.textContent = t("dashboard.modulesHint");
 
-    clear(twitchValue);
-    twitchValue.append(h("div", { class: "stat-strong", text: `${current.twitch.live ?? 0} / ${current.twitch.total ?? 0}` }));
-    twitchHint.textContent = current.twitch.last_error || t("twitch.polling", { s: current.twitch.poll_seconds || 60 });
+    twitchValue.textContent = `${current.twitch?.live ?? 0} / ${current.twitch?.total ?? 0}`;
+    twitchHint.textContent = current.twitch?.last_error || t("twitch.polling", { s: current.twitch?.poll_seconds || 60 });
+
     renderModules(current);
+    renderInstance(current);
   }
 
   async function loadLogs() {
@@ -170,7 +264,6 @@ export async function render(ctx) {
 
   updateStats(status);
   updateWarnings(status);
-  renderModules(status);
   loadPanelWarning();
   await loadLogs();
 

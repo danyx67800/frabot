@@ -22,7 +22,7 @@ h1{font-size:22px;margin:0 0 4px}
 .content{white-space:pre-wrap;word-break:break-word}
 .redacted{color:#8b90a5;font-style:italic}
 .attach a{color:#7dd3fc;font-size:13px;display:block;margin-top:6px}
-.embed{border-left:3px solid #7c5cff;padding:8px 12px;margin-top:8px;background:#101322}
+.embed{border-left:3px solid #d2e85c;padding:8px 12px;margin-top:8px;background:#101322}
 .embed .etitle{font-weight:600;color:#fff}
 .footer{margin-top:28px;color:#6f7488;font-size:12px}
 """
