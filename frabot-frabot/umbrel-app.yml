@@ -4,7 +4,7 @@ manifestVersion: 1
 id: frabot-frabot
 category: Social
 name: FraBot
-version: "1.0.2"
+version: "1.1.0"
 tagline: Bot Discord self-hosted con pannello web in italiano
 description: |-
   FraBot è un bot Discord self-hosted che si configura interamente dal browser:
@@ -45,13 +45,16 @@ path: ""
 defaultUsername: ""
 defaultPassword: ""
 releaseNotes: |-
-  Corregge la sincronizzazione dei comandi nelle gilde.
+  Nuova identità visiva del pannello: palette verde-inchiostro con accento
+  chartreuse, tipografia sans/mono, logo rinnovato e navigazione a icone al
+  posto dei numeri.
 
 
-  discord.py sincronizza in una gilda solo i comandi registrati per quella
-  gilda: i comandi globali venivano ignorati e Discord restituiva 0. Ora i
-  comandi vengono copiati nella gilda prima della sincronizzazione; se non
-  viene registrato nulla, il pannello mostra un errore invece di un falso
-  successo.
+  Ridisegnati dashboard, ticket, giochi, Twitch, log, impostazioni e wizard:
+  tabelle e form più leggibili, contrasto migliorato e pulsanti senza glow.
+
+
+  Il colore predefinito degli embed Discord passa a #D2E85C per le nuove
+  installazioni. Aggiornando, i dati in /data restano invariati.
 submitter: FraBot
 submission: https://github.com/OWNER/frabot

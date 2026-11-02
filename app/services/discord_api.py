@@ -7,7 +7,7 @@ import aiohttp
 log = logging.getLogger("frabot.discordapi")
 
 API = "https://discord.com/api/v10"
-USER_AGENT = "DiscordBot (https://github.com/frabot/frabot, 1.0.2)"
+USER_AGENT = "DiscordBot (https://github.com/frabot/frabot, 1.1.0)"
 
 
 class DiscordAPIError(Exception):
